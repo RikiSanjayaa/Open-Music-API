@@ -8,6 +8,8 @@ const AlbumsService = require('./services/postgres/AlbumsService');
 const SongsService = require('./services/postgres/SongsService');
 const AlbumsValidator = require('./validators/albums');
 const SongsValidator = require('./validators/songs');
+const NotFoundError = require('./exceptions/NotFoundError');
+const InvariantError = require('./exceptions/InvariantError');
 
 const init = async () => {
   const albumsService = new AlbumsService();
@@ -44,7 +46,9 @@ const init = async () => {
     // mendapatkan konteks response dari request
     const { response } = request;
     if (response instanceof Error) {
-      if (response instanceof ClientError) {
+      if (response instanceof ClientError
+        || response instanceof NotFoundError
+        || response instanceof InvariantError) {
         const newResponse = h.response({
           status: 'fail',
           message: response.message,

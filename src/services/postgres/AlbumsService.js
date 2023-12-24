@@ -37,17 +37,17 @@ class AlbumsService {
     };
     const result = await this._pool.query(albumQuery);
 
+    if (!result.rows.length) {
+      throw new NotFoundError('Album tidak ditemukan');
+    }
+
     const songQuery = {
       text: 'SELECT * FROM songs WHERE album_id = $1',
       values: [id],
     };
     const songsWithAlbumId = await this._pool.query(songQuery);
-
     result.rows[0].songs = songsWithAlbumId.rows;
 
-    if (!result.rows.length) {
-      throw new NotFoundError('Album tidak ditemukan');
-    }
     return result.rows[0];
   }
 
