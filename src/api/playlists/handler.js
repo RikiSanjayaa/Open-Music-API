@@ -52,8 +52,6 @@ class PlaylistsHandler {
     const { songId } = request.payload;
     const { id: credentialId } = request.auth.credentials;
     await this._service.verifyPlaylistAccess(playlistId, credentialId);
-    console.log(songId);
-    console.log(playlistId);
     await this._service.addSongtoPlaylist({ playlistId, songId });
     await this._activitiesService.addActivity({
       playlistId, songId, userId: credentialId, action: 'add',

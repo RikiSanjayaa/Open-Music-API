@@ -40,10 +40,6 @@ const ActivitiesService = require('./services/postgres/ActivitiesService');
 
 // exceptions
 const ClientError = require('./exceptions/ClientError');
-const NotFoundError = require('./exceptions/NotFoundError');
-const InvariantError = require('./exceptions/InvariantError');
-const AuthenticationsError = require('./exceptions/AuthenticationsError');
-const AuthorizationError = require('./exceptions/AuthorizationError');
 
 const init = async () => {
   const albumsService = new AlbumsService();
@@ -144,11 +140,7 @@ const init = async () => {
     // mendapatkan konteks response dari request
     const { response } = request;
     if (response instanceof Error) {
-      if (response instanceof ClientError
-        || response instanceof NotFoundError
-        || response instanceof InvariantError
-        || response instanceof AuthenticationsError
-        || response instanceof AuthorizationError) {
+      if (response instanceof ClientError) {
         const newResponse = h.response({
           status: 'fail',
           message: response.message,

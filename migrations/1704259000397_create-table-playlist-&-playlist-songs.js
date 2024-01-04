@@ -1,7 +1,5 @@
 /* eslint-disable camelcase */
 
-exports.shorthands = undefined;
-
 exports.up = (pgm) => {
   pgm.createTable('playlists', {
     id: {
@@ -33,14 +31,13 @@ exports.up = (pgm) => {
       notNull: true,
     },
   });
+  pgm.addConstraint('playlist_songs', 'unique_playlist_id_and_song_id', 'UNIQUE(playlist_id, song_id)');
+
   pgm.addConstraint('playlist_songs', 'fk_playlist_songs.playlist.id', 'FOREIGN KEY(playlist_id) REFERENCES playlists(id) ON DELETE CASCADE');
   pgm.addConstraint('playlist_songs', 'fk_playlist_songs.song.id', 'FOREIGN KEY(song_id) REFERENCES songs(id) ON DELETE CASCADE');
 };
 
 exports.down = (pgm) => {
-  pgm.dropConstraint('playlist_songs', 'fk_playlist_songs.playlist.id');
-  pgm.dropConstraint('playlist_songs', 'fk_playlist_songs.song.id');
-  pgm.dropConstraint('playlists', 'fk_playlists.owner_users.id');
   pgm.dropTable('playlist_songs');
   pgm.dropTable('playlists');
 };

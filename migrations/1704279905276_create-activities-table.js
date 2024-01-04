@@ -1,12 +1,6 @@
 /* eslint-disable camelcase */
 
-exports.shorthands = undefined;
-
 exports.up = (pgm) => {
-  // lupa add constraint foreign key untuk album_id
-  pgm.addConstraint('songs', 'fk_songs.album_id_albums.id', 'FOREIGN KEY(album_id) REFERENCES albums(id) ON DELETE CASCADE');
-
-  // activities table
   pgm.createTable('playlist_song_activities', {
     id: {
       type: 'VARCHAR(50)',
@@ -37,6 +31,5 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropConstraint('songs', 'fk_songs.album_id_albums.id');
   pgm.dropTable('playlist_song_activities');
 };
