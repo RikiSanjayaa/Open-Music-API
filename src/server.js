@@ -2,6 +2,11 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
+const path = require('path');
+
+// env
+const config = require('./utils/config');
 
 // songs
 const songs = require('./api/songs');
@@ -12,6 +17,10 @@ const SongsService = require('./services/postgres/SongsService');
 const albums = require('./api/albums');
 const AlbumsValidator = require('./validators/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
+
+// album likes
+const albumLikes = require('./api/albumLikes');
+const AlbumLikesService = require('./services/postgres/AlbumLikesService');
 
 // playlists
 const playlists = require('./api/playlists');
@@ -38,21 +47,37 @@ const CollaborationsService = require('./services/postgres/CollaborationsService
 const activities = require('./api/activities');
 const ActivitiesService = require('./services/postgres/ActivitiesService');
 
+// exports
+const _exports = require('./api/exports');
+const ExportsValidator = require('./validators/exports');
+const ProducerService = require('./services/rabbitmq/ProducerService');
+
+// uploads
+const uploads = require('./api/uploads');
+const StorageService = require('./services/storage/StorageService');
+const UploadsValidator = require('./validators/uploads');
+
+// cache
+const CacheService = require('./services/redis/CacheService');
+
 // exceptions
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
+  const cacheService = new CacheService();
   const albumsService = new AlbumsService();
+  const albumLikesService = new AlbumLikesService(cacheService);
   const songsService = new SongsService();
   const usersService = new UsersService();
   const activitiesService = new ActivitiesService();
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationsService();
   const playlistsService = new PlaylistsService(collaborationsService);
+  const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
 
   const server = Hapi.server({
-    port: process.env.PORT,
-    host: process.env.HOST,
+    port: config.app.port,
+    host: config.app.host,
     routes: {
       cors: {
         origin: ['*'],
@@ -61,7 +86,7 @@ const init = async () => {
   });
 
   // external plugin
-  await server.register([{ plugin: Jwt }]);
+  await server.register([{ plugin: Jwt }, { plugin: Inert }]);
 
   // mendefinisikan strategy autentikasi jwt
   server.auth.strategy('openmusic_jwt', 'jwt', {
@@ -132,6 +157,29 @@ const init = async () => {
       plugin: activities,
       options: {
         service: activitiesService,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        service: ProducerService,
+        playlistsService,
+        validator: ExportsValidator,
+      },
+    },
+    {
+      plugin: uploads,
+      options: {
+        service: storageService,
+        albumsService,
+        validator: UploadsValidator,
+      },
+    },
+    {
+      plugin: albumLikes,
+      options: {
+        service: albumLikesService,
+        albumsService,
       },
     },
   ]);

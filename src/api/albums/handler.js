@@ -5,7 +5,7 @@ class AlbumsHandler {
     this.name = 'albums';
   }
 
-  async postItemHandler(request, h) {
+  postItemHandler = async (request, h) => {
     this._validator.validateAlbumPayload(request.payload);
 
     const { name, year } = request.payload;
@@ -16,26 +16,26 @@ class AlbumsHandler {
     });
     response.code(201);
     return response;
-  }
+  };
 
-  async getItemsHandler() {
+  getItemsHandler = async () => {
     const albums = await this._service.getAlbums();
     return {
       status: 'success',
       data: { albums },
     };
-  }
+  };
 
-  async getItemByIdHandler(request) {
+  getItemByIdHandler = async (request) => {
     const { id } = request.params;
     const album = await this._service.getAlbumById(id);
     return {
       status: 'success',
       data: { album },
     };
-  }
+  };
 
-  async putItemByIdHandler(request, h) {
+  putItemByIdHandler = async (request, h) => {
     const { id } = request.params;
 
     this._validator.validateAlbumPayload(request.payload);
@@ -47,16 +47,16 @@ class AlbumsHandler {
     });
     response.code(200);
     return response;
-  }
+  };
 
-  async deleteItemByIdHandler(request) {
+  deleteItemByIdHandler = async (request) => {
     const { id } = request.params;
     await this._service.deleteAlbumById(id);
     return {
       status: 'success',
       message: 'Album berhasil dihapus',
     };
-  }
+  };
 }
 
 module.exports = AlbumsHandler;
