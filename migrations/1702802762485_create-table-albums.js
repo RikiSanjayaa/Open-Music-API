@@ -14,6 +14,10 @@ exports.up = (pgm) => {
       type: 'INTEGER',
       notNull: true,
     },
+    cover_url: {
+      type: 'TEXT',
+      notNull: false,
+    },
   });
   pgm.createTable('songs', {
     id: {
@@ -49,6 +53,6 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable('albums');
   pgm.dropTable('songs');
+  pgm.dropTable('albums');
 };
